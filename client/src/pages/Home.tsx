@@ -19,19 +19,20 @@ export default function Home() {
 
   const checkTextMutation = useMutation({
     mutationFn: async (textToCheck: string) => {
-      const response = await apiRequest<CheckTextResponse>(
+      const response = await apiRequest(
         "POST",
         "/api/check",
         { text: textToCheck }
       );
-      return response;
+      return await response.json() as CheckTextResponse;
     },
     onSuccess: (data) => {
-      setErrors(data.corrections);
-      setTone(data.tone);
-      setCorrectedText(data.correctedText);
+      const corrections = data.corrections || [];
+      setErrors(corrections);
+      setTone(data.tone || null);
+      setCorrectedText(data.correctedText || text);
       
-      if (data.corrections.length === 0) {
+      if (corrections.length === 0) {
         toast({
           title: "Great work!",
           description: "No grammar issues found in your text.",
@@ -88,6 +89,7 @@ export default function Home() {
             text={text}
             setText={setText}
             errors={errors}
+            setErrors={setErrors}
             isChecking={checkTextMutation.isPending}
           />
 

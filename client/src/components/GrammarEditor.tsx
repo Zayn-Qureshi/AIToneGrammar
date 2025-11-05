@@ -12,6 +12,7 @@ interface GrammarEditorProps {
   text: string;
   setText: (text: string) => void;
   errors: GrammarError[];
+  setErrors: (errors: GrammarError[]) => void;
   isChecking: boolean;
 }
 
@@ -25,10 +26,27 @@ export function GrammarEditor({
   text,
   setText,
   errors,
+  setErrors,
   isChecking,
 }: GrammarEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const [openPopoverId, setOpenPopoverId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    const overlay = overlayRef.current;
+    
+    if (!textarea || !overlay) return;
+
+    const syncScroll = () => {
+      overlay.scrollTop = textarea.scrollTop;
+      overlay.scrollLeft = textarea.scrollLeft;
+    };
+
+    textarea.addEventListener("scroll", syncScroll);
+    return () => textarea.removeEventListener("scroll", syncScroll);
+  }, []);
 
   const getHighlightedSegments = (): HighlightedSegment[] => {
     if (errors.length === 0) {
@@ -72,7 +90,20 @@ export function GrammarEditor({
       text.substring(0, error.offset) +
       replacement +
       text.substring(error.offset + error.length);
+    
+    const lengthDiff = replacement.length - error.length;
+    
+    const updatedErrors = errors
+      .filter((e) => e.offset !== error.offset)
+      .map((e) => {
+        if (e.offset > error.offset) {
+          return { ...e, offset: e.offset + lengthDiff };
+        }
+        return e;
+      });
+    
     setText(newText);
+    setErrors(updatedErrors);
     setOpenPopoverId(null);
   };
 
@@ -93,6 +124,7 @@ export function GrammarEditor({
 
         {errors.length > 0 && (
           <div
+            ref={overlayRef}
             className="absolute inset-0 p-6 text-base leading-relaxed pointer-events-none font-mono whitespace-pre-wrap break-words overflow-hidden"
             aria-hidden="true"
           >
@@ -105,9 +137,8 @@ export function GrammarEditor({
                 >
                   <PopoverTrigger asChild>
                     <span
-                      className="relative inline pointer-events-auto cursor-pointer hover:bg-destructive/10 transition-colors"
+                      className="relative inline pointer-events-auto cursor-pointer hover:bg-destructive/10 transition-colors underline decoration-wavy decoration-destructive decoration-2"
                       style={{
-                        borderBottom: "2px wavy #ef4444",
                         color: "transparent",
                       }}
                       data-testid={`error-highlight-${index}`}
