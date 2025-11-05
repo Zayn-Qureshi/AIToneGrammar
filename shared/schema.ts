@@ -1,18 +1,32 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+// Grammar correction interface
+export interface GrammarError {
+  message: string;
+  offset: number;
+  length: number;
+  replacements: string[];
+  context: string;
+  rule?: string;
+  category?: string;
+}
+
+// Tone analysis interface
+export interface ToneAnalysis {
+  tone: string;
+  confidence: number;
+  label: string;
+}
+
+// Request/Response schemas for API
+export const checkTextSchema = z.object({
+  text: z.string().min(1, "Text cannot be empty"),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
+export type CheckTextRequest = z.infer<typeof checkTextSchema>;
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+export interface CheckTextResponse {
+  corrections: GrammarError[];
+  tone: ToneAnalysis;
+  correctedText: string;
+}
