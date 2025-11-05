@@ -2,7 +2,14 @@
 
 ## Overview
 
-This is an AI-powered writing assistant application that provides real-time grammar checking and tone analysis. The application features a clean, distraction-free interface where users can input text and receive instant feedback on grammar errors and writing tone. Built with a modern stack featuring React on the frontend and Express on the backend, it integrates with external APIs (LanguageTool for grammar checking) to provide intelligent writing assistance.
+This is an AI-powered writing assistant application that provides real-time grammar checking and tone analysis. The application features a clean, distraction-free interface where users can input text and receive instant feedback on grammar errors and writing tone. Built with a modern stack featuring React on the frontend and Express on the backend, it integrates with external APIs (LanguageTool for grammar checking and Hugging Face for tone detection) to provide intelligent writing assistance.
+
+**Current Status**: ✅ Fully functional and tested
+- Grammar checking with interactive error highlights and suggestions
+- Tone detection with visual confidence indicator
+- Copy corrected text to clipboard
+- Light/dark theme support
+- Real-time text statistics (words, characters, errors)
 
 ## User Preferences
 
@@ -72,7 +79,7 @@ Preferred communication style: Simple, everyday language.
 
 **Third-Party APIs**
 - **LanguageTool API** (`https://api.languagetool.org/v2/check`): Free grammar and spell-checking service that analyzes text and returns corrections with context, categories, and replacement suggestions
-- **Tone Analysis**: Placeholder implementation (currently returns mock data) designed to integrate with a sentiment/tone analysis API
+- **Hugging Face API** (`j-hartmann/emotion-english-distilroberta-base`): Sentiment/tone analysis model that classifies text into emotional tones with confidence scores. Gracefully falls back to "Neutral" tone when the API returns 410 (model loading) or if the HUGGINGFACE_API_KEY is not configured
 
 **UI Component Libraries**
 - **Radix UI**: Headless accessible components (@radix-ui/react-*) for dialogs, popovers, dropdowns, tooltips, and other interactive elements
